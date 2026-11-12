@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="uz" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAMON24.UZ — O'zbekiston va Jahon Yangiliklari Portali</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter & Merriweather -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind Config for Dark Mode & Custom Fonts -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar & Ticker Animation */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Ticker Animation */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            display: flex;
+            width: max-content;
+            animation: marquee 35s linear infinite;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
+
+        /* Smooth Fade In */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+
+        /* Hide scrollbar for category bar on mobile */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased transition-colors duration-300">
+
+    <!-- Toast Notification Container (No alert() used) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- 1. TOP BAR (Sana, Ob-havo, Valyuta kurslari, Ijtimoiy tarmoqlar) -->
+    <div class="bg-slate-900 text-slate-300 text-xs border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2">
+            <!-- Date & Weather -->
+            <div class="flex items-center space-x-4">
+                <span id="current-date" class="flex items-center gap-1.5 font-medium text-slate-200">
+                    <i class="fa-regular fa-calendar text-blue-400"></i>
+                    <span>12-Noyabr, 2026</span>
+                </span>
+                <span class="hidden sm:inline text-slate-600">|</span>
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-sun text-amber-400"></i>
+                    <span>Toshkent: <strong class="text-white">+18°C</strong></span>
+                </span>
+            </div>
+
+            <!-- Currency Rates -->
+            <div class="flex items-center space-x-4 overflow-x-auto no-scrollbar">
+                <div class="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-0.5 rounded-full">
+                    <span class="font-bold text-emerald-400">USD</span>
+                    <span class="text-white font-semibold">12 840.50</span>
+                    <span class="text-emerald-400 text-[10px]"><i class="fa-solid fa-caret-up"></i> +12.30</span>
+                </div>
+                <div class="hidden md:flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-0.5 rounded-full">
+                    <span class="font-bold text-blue-400">EUR</span>
+                    <span class="text-white font-semibold">13 920.15</span>
+                    <span class="text-rose-400 text-[10px]"><i class="fa-solid fa-caret-down"></i> -18.40</span>
+                </div>
+                <div class="hidden lg:flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-0.5 rounded-full">
+                    <span class="font-bold text-indigo-400">RUB</span>
+                    <span class="text-white font-semibold">134.80</span>
+                    <span class="text-emerald-400 text-[10px]"><i class="fa-solid fa-caret-up"></i> +0.45</span>
+                </div>
+
+                <!-- Social Icons -->
+                <div class="hidden sm:flex items-center space-x-3 pl-2 border-l border-slate-700">
+                    <a href="#telegram" onclick="showToast('ZAMON24 rasmiy Telegram kanaliga yo\'naltirilmoqda...')" class="hover:text-sky-400 transition"><i class="fa-brands fa-telegram text-sm"></i></a>
+                    <a href="#youtube" onclick="showToast('ZAMON24 YouTube sahifasi ochildi')" class="hover:text-red-500 transition"><i class="fa-brands fa-youtube text-sm"></i></a>
+                    <a href="#instagram" onclick="showToast('ZAMON24 Instagram sahifasi ochildi')" class="hover:text-pink-500 transition"><i class="fa-brands fa-instagram text-sm"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. HEADER & NAVIGATION -->
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20 gap-4">
+                
+                <!-- Brand Logo -->
+                <a href="#" onclick="resetFilters()" class="flex items-center gap-2.5 shrink-0 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-600/30 group-hover:scale-105 transition-transform">
+                        Z
+                    </div>
+                    <div>
+                        <span class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">ZAMON<span class="text-blue-600 dark:text-blue-400">24</span></span>
+                        <span class="block text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 -mt-1 font-semibold">Tezkor va Xolis Axborot</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Categories -->
+                <nav id="desktop-nav" class="hidden xl:flex items-center space-x-1">
+                    <!-- Populated via JS -->
+                </nav>
+
+                <!-- Search & Dark Mode Controls -->
+                <div class="flex items-center gap-2 sm:gap-3 flex-1 max-w-md justify-end">
+                    <!-- Live Search Input -->
+                    <div class="relative w-full max-w-[220px] sm:max-w-[280px]">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input 
+                            type="text" 
+                            id="search-input" 
+                            placeholder="Yangiliklarni izlash..." 
+                            class="w-full pl-9 pr-8 py-2 text-sm bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-950 rounded-full outline-none transition-all placeholder-slate-400 dark:text-white"
+                        >
+                        <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- Dark/Light Theme Toggle -->
+                    <button 
+                        id="theme-toggle" 
+                        aria-label="Mavzuni o'zgartirish"
+                        class="p-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shrink-0"
+                        title="Tun / Kun rejimi"
+                    >
+                        <i id="theme-icon" class="fa-solid fa-moon text-base"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile & Tablet Category Bar -->
+            <div id="mobile-nav" class="flex xl:hidden items-center space-x-2 py-2.5 overflow-x-auto no-scrollbar border-t border-slate-100 dark:border-slate-800">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. BREAKING NEWS TICKER -->
+    <div class="bg-blue-50 dark:bg-slate-900/80 border-b border-blue-100 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3 overflow-hidden">
+            <span class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-600 text-white shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                Dolzarb
+            </span>
+            <div class="overflow-hidden relative flex-1">
+                <div id="breaking-ticker" class="animate-marquee flex items-center gap-10 text-sm font-medium text-slate-700 dark:text-slate-200">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+        <!-- Search / Filter Status Banner (Hidden by default) -->
+        <div id="filter-banner" class="hidden mb-6 p-4 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-sm sm:text-base">
+                <i class="fa-solid fa-filter text-blue-600 dark:text-blue-400"></i>
+                <span id="filter-status-text" class="font-medium"></span>
+            </div>
+            <button onclick="resetFilters()" class="px-3.5 py-1.5 text-xs font-semibold rounded-full bg-blue-600 text-white hover:bg-blue-700 transition">
+                Barchasini ko'rsatish
+            </button>
+        </div>
+
+        <!-- 4. HERO SECTION (Featured Article + Latest News Sidebar) -->
+        <section id="hero-section" class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-10">
+            <!-- Left: Featured Article (7 cols) -->
+            <div id="featured-container" class="lg:col-span-7 xl:col-span-8">
+                <!-- Populated via JS -->
+            </div>
+
+            <!-- Right: Latest News Feed (5 cols) -->
+            <div class="lg:col-span-5 xl:col-span-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm flex flex-col">
+                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
+                    <h2 class="text-lg font-extrabold flex items-center gap-2 text-slate-900 dark:text-white">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                        So'nggi yangiliklar
+                    </h2>
+                    <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">Jonli lenta</span>
+                </div>
+                <div id="latest-news-list" class="space-y-3.5 overflow-y-auto max-h-[460px] pr-1">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. MAIN NEWS GRID & 7. SIDEBAR WIDGETS -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left / Center: Articles Grid (8 cols) -->
+            <div class="lg:col-span-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 id="grid-heading" class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+                        <span class="w-1.5 h-7 rounded-full bg-blue-600"></span>
+                        Barcha dolzarb maqolalar
+                    </h2>
+                    <span id="articles-count" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        14 ta maqola
+                    </span>
+                </div>
+
+                <!-- Articles Grid -->
+                <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Populated via JS -->
+                </div>
+
+                <!-- Empty State (When search finds nothing) -->
+                <div id="empty-state" class="hidden py-16 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-2xl">
+                        <i class="fa-regular fa-face-frown-open"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-1">Hech qanday yangilik topilmadi</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Boshqa kalit so'zlar bilan qidirib ko'ring yoki barcha kategoriyalarga qayting.</p>
+                    <button onclick="resetFilters()" class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition">
+                        Barcha yangiliklarni ko'rish
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Interactive Sidebar Widgets (4 cols) -->
+            <aside class="lg:col-span-4 space-y-6">
+                
+                <!-- Widget 1: Eng ko'p o'qilganlar (Top 5) -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm">
+                    <h3 class="text-lg font-extrabold mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
+                        <i class="fa-solid fa-fire text-orange-500"></i>
+                        Eng ko'p o'qilganlar
+                    </h3>
+                    <div id="top-read-list" class="space-y-4">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <!-- Widget 2: Valyuta konvertori (USD <-> UZS) -->
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-900 dark:to-indigo-950 text-white rounded-2xl p-5 shadow-md border border-slate-700/60">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-base font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-emerald-400"></i>
+                            Valyuta konvertori
+                        </h3>
+                        <span class="text-[11px] px-2 py-0.5 rounded bg-white/10 text-slate-300">MB kursi</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">1 USD = 12 840.50 UZS</p>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">AQSh dollari (USD)</label>
+                            <div class="relative">
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-emerald-400">$</span>
+                                <input type="number" id="usd-input" value="100" min="0" class="w-full pl-8 pr-4 py-2 rounded-xl bg-white/10 border border-white/15 text-white font-semibold focus:border-emerald-400 outline-none">
+                            </div>
+                        </div>
+                        <div class="flex justify-center">
+                            <span class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs text-slate-300">
+                                <i class="fa-solid fa-arrow-down-up"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">O'zbek so'mi (UZS)</label>
+                            <div class="relative">
+                                <input type="number" id="uzs-input" value="1284050" min="0" class="w-full pl-4 pr-12 py-2 rounded-xl bg-white/10 border border-white/15 text-white font-semibold focus:border-emerald-400 outline-none">
+                                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">UZS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget 3: Kun savoli / So'rovnoma -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm">
+                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 mb-2">
+                        Kun so'rovnomasi
+                    </span>
+                    <h3 class="text-base font-bold mb-3 text-slate-900 dark:text-white">
+                        Sun'iy intellekt (AI) texnologiyalari kundalik ish faoliyatingizni qanchalik yengillashtirmoqda?
+                    </h3>
+                    <div id="poll-options" class="space-y-2.5">
+                        <!-- Populated via JS -->
+                    </div>
+                    <p id="poll-total" class="text-xs text-slate-500 dark:text-slate-400 mt-3 text-right">Jami ovozlar: 1 428 ta</p>
+                </div>
+
+                <!-- Widget 4: Obuna bo'lish (Newsletter) -->
+                <div class="bg-blue-600 text-white rounded-2xl p-5 shadow-md">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl mb-3">
+                        <i class="fa-regular fa-envelope-open"></i>
+                    </div>
+                    <h3 class="text-lg font-extrabold mb-1">Kunlik dayjestga obuna bo'ling</h3>
+                    <p class="text-xs text-blue-100 mb-4 leading-relaxed">
+                        Eng muhim xabarlar va tahliliy maqolalar har kuni kechqurun elektron pochtangizga yuboriladi.
+                    </p>
+                    <form id="newsletter-form" class="space-y-2.5">
+                        <input type="email" id="newsletter-email" required placeholder="Elektron pochta manzilingiz..." class="w-full px-3.5 py-2.5 rounded-xl bg-white text-slate-900 text-sm placeholder-slate-400 outline-none focus:ring-2 focus:ring-blue-300">
+                        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold transition shadow-sm">
+                            Obuna bo'lish
+                        </button>
+                    </form>
+                </div>
+
+            </aside>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-lg">Z</div>
+                        <span class="text-xl font-extrabold text-white">ZAMON<span class="text-blue-400">24</span></span>
+                    </div>
+                    <p class="text-sm leading-relaxed mb-4">
+                        O'zbekiston va jahonda ro'y berayotgan eng muhim voqealar, tahliliy maqolalar, iqtisodiy sharhlar va texnologik yangiliklarni tezkor hamda xolis yorituvchi axborot portali.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Ruknlar</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><button onclick="selectCategory('O\'zbekiston')" class="hover:text-white transition">O'zbekiston</button></li>
+                        <li><button onclick="selectCategory('Jahon')" class="hover:text-white transition">Jahon</button></li>
+                        <li><button onclick="selectCategory('Iqtisodiyot')" class="hover:text-white transition">Iqtisodiyot</button></li>
+                        <li><button onclick="selectCategory('Texnologiya')" class="hover:text-white transition">Texnologiya</button></li>
+                        <li><button onclick="selectCategory('Sport')" class="hover:text-white transition">Sport</button></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Tahririyat</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#about" onclick="showToast('Tahririyat haqida ma\'lumot bo\'limi')" class="hover:text-white transition">Sayt haqida</a></li>
+                        <li><a href="#ads" onclick="showToast('Reklama bo\'limi: +998 71 200-24-24')" class="hover:text-white transition">Reklama va hamkorlik</a></li>
+                        <li><a href="#rules" onclick="showToast('Materiallardan foydalanishda ZAMON24.UZ havolasi shart')" class="hover:text-white transition">Foydalanish shartlari</a></li>
+                        <li><a href="#contact" onclick="showToast('Aloqa: info@zamon24.uz')" class="hover:text-white transition">Aloqa</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Bog'lanish</h4>
+                    <p class="text-sm mb-2"><i class="fa-solid fa-location-dot text-blue-400 mr-2"></i>Toshkent sh., Amir Temur shoh ko'chasi, 108-uy</p>
+                    <p class="text-sm mb-2"><i class="fa-solid fa-phone text-blue-400 mr-2"></i>+998 (71) 200-24-24</p>
+                    <p class="text-sm"><i class="fa-solid fa-envelope text-blue-400 mr-2"></i>info@zamon24.uz</p>
+                </div>
+            </div>
+            <div class="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs gap-4">
+                <p>© 2026 ZAMON24.UZ. Barcha huquqlar himoyalangan. OAV sifatida davlat ro'yxatidan o'tgan (№ 1492).</p>
+                <p>Materiallardan nusxa ko'chirilganda manba ko'rsatilishi shart.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 6. INTERACTIVE ARTICLE READER MODAL -->
+    <div id="article-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/75 backdrop-blur-sm p-2 sm:p-6">
+        <div class="relative max-w-4xl mx-auto bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-4 fade-in">
+            
+            <!-- Top Sticky Bar inside Modal -->
+            <div class="sticky top-0 z-20 flex items-center justify-between px-5 py-3.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2">
+                    <span id="modal-category-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white">Kategoriya</span>
+                    <span id="modal-date" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline"></span>
+                </div>
+
+                <!-- Font Size Controls, Share & Close -->
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1" title="Shrift o'lchami">
+                        <button onclick="changeFontSize(-1)" class="w-7 h-7 rounded-full hover:bg-white dark:hover:bg-slate-700 text-xs font-bold transition">A-</button>
+                        <button onclick="changeFontSize(1)" class="w-7 h-7 rounded-full hover:bg-white dark:hover:bg-slate-700 text-sm font-bold transition">A+</button>
+                    </div>
+                    <button onclick="copyArticleLink()" class="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-blue-600 hover:text-white text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-share-nodes"></i>
+                        <span class="hidden sm:inline">Ulashish</span>
+                    </button>
+                    <button onclick="closeArticleModal()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-rose-600 hover:text-white flex items-center justify-center transition" aria-label="Yopish">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 sm:p-8 md:p-10">
+                <h1 id="modal-title" class="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight text-slate-900 dark:text-white mb-4"></h1>
+                
+                <!-- Author & Meta -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    <div class="flex items-center gap-3">
+                        <div id="modal-author-avatar" class="w-10 h-10 rounded-full bg-blue-600/15 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center"></div>
+                        <div>
+                            <p id="modal-author" class="font-bold text-slate-800 dark:text-slate-200"></p>
+                            <p class="text-xs">Maxsus muxbir</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span><i class="fa-regular fa-clock mr-1"></i><span id="modal-read-time"></span></span>
+                        <span><i class="fa-regular fa-eye mr-1"></i><span id="modal-views"></span></span>
+                    </div>
+                </div>
+
+                <!-- Hero Image -->
+                <div class="rounded-2xl overflow-hidden mb-8 bg-slate-200 dark:bg-slate-800 aspect-video">
+                    <img id="modal-image" src="" alt="" class="w-full h-full object-cover">
+                </div>
+
+                <!-- Lead Summary -->
+                <p id="modal-lead" class="text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-200 leading-relaxed mb-6 border-l-4 border-blue-600 pl-4"></p>
+
+                <!-- Full Article Content -->
+                <div id="modal-body" class="font-serif text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed space-y-5">
+                    <!-- Paragraphs populated via JS -->
+                </div>
+
+                <!-- Quote Block -->
+                <blockquote id="modal-quote-box" class="my-8 p-6 rounded-2xl bg-slate-100 dark:bg-slate-800/70 border-l-4 border-indigo-500">
+                    <p id="modal-quote" class="italic font-serif text-base sm:text-lg text-slate-800 dark:text-slate-200 mb-2"></p>
+                    <footer id="modal-quote-author" class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400"></footer>
+                </blockquote>
+
+                <!-- Tags -->
+                <div id="modal-tags" class="flex flex-wrap items-center gap-2 pt-4 pb-8 border-b border-slate-200 dark:border-slate-800">
+                    <!-- Tags via JS -->
+                </div>
+
+                <!-- Related Articles -->
+                <div class="my-8">
+                    <h3 class="text-lg font-extrabold mb-4 text-slate-900 dark:text-white">Mavzuga oid o'xshash maqolalar</h3>
+                    <div id="modal-related" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Related via JS -->
+                    </div>
+                </div>
+
+                <!-- Interactive Comments Section -->
+                <div class="pt-6 border-t border-slate-200 dark:border-slate-800">
+                    <h3 class="text-lg font-extrabold mb-4 flex items-center gap-2">
+                        <i class="fa-regular fa-comments text-blue-600"></i>
+                        Fikr va mulohazalar (<span id="comment-count">0</span>)
+                    </h3>
+
+                    <!-- Add Comment Form -->
+                    <form id="comment-form" class="mb-6 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/60 space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input type="text" id="comment-name" required placeholder="Ismingiz..." class="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500">
+                        </div>
+                        <textarea id="comment-text" rows="2" required placeholder="Maqola yuzasidan fikringizni yozib qoldiring..." class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm outline-none focus:border-blue-500"></textarea>
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
+                                Izoh qoldirish
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Comments List -->
+                    <div id="comments-list" class="space-y-3">
+                        <!-- Comments via JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC & RICH DATA -->
+    <script>
+        // ==========================================
+        // 1. BOY MA'LUMOTLAR BAZASI (14 ta maqola)
+        // ==========================================
+        const CATEGORIES = [
+            "Barchasi",
+            "O'zbekiston",
+            "Jahon",
+            "Iqtisodiyot",
+            "Texnologiya",
+            "Sport",
+            "Madaniyat"
+        ];
+
+        const ARTICLES = [
+            {
+                id: 1,
+                featured: true,
+                title: "O'zbekistonda «Yashil energetika» ulushi 2030-yilga borib 40 foizga yetkaziladi: yirik quyosh va shamol stansiyalari ishga tushmoqda",
+                category: "O'zbekiston",
+                time: "Bugun, 08:45",
+                readTime: "5 daqiqa",
+                views: 18420,
+                author: "Jamshid Karimov",
+                image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=80",
+                lead: "Mamlakatimizning Buxoro, Navoiy, Qashqadaryo va Samarqand viloyatlarida umumiy quvvati 3,5 GVt bo'lgan yangi quyosh va shamol elektr stansiyalari tarmoqqa ulanmoqda.",
+                content: [
+                    "O'zbekiston energetika tizimida so'nggi yillarda misli ko'rilmagan tarkibiy o'zgarishlar amalga oshirilmoqda. An'anaviy tabiiy gazga bo'lgan qaramlikni kamaytirish va atmosferaga chiqarilayotgan zararli gazlar miqdorini qisqartirish maqsadida qayta tiklanuvchi energiya manbalariga milliardlab dollar xorijiy investitsiyalar jalb etildi.",
+                    "Energetika vazirligi ma'lumotlariga ko'ra, joriy yil yakuniga qadar yangi quvvatlarning ishga tushirilishi natijasida yiliga qo'shimcha 9 milliard kilovatt-soat «yashil» elektr energiyasi ishlab chiqariladi. Bu esa qariyb 2,5 milliard kub metr tabiiy gazni tejash imkonini beradi.",
+                    "Bundan tashqari, energiya tizimining barqarorligini ta'minlash uchun Toshkent va Andijon viloyatlarida yirik energiya saqlash batareya tizimlari (BESS) qurilishi boshlangan. Mutaxassislarning ta'kidlashicha, mazkur loyihalar Markaziy Osiyo mintaqasida yagona va eng yirik infratuzilma hisoblanadi."
+                ],
+                quote: "Yashil energetikaga o'tish — bu shunchaki ekologik tanlov emas, balki mamlakatimizning uzoq muddatli iqtisodiy xavfsizligi va sanoat raqobatbardoshligining asosiy kafolatidir.",
+                quoteAuthor: "Energetika vazirligi tahliliy markazi",
+                tags: ["Energetika", "Yashil iqtisodiyot", "Investitsiya", "O'zbekiston"],
+                comments: [
+                    { name: "Sardor Alimov", time: "35 daqiqa oldin", text: "Juda quvonarli xabar! Ayniqsa quyosh panellarini xonadonlarga o'rnatish dasturi ham yaxshi samara bermoqda." },
+                    { name: "Dilnoza Raximova", time: "12 daqiqa oldin", text: "Navoiy va Buxorodagi stansiyalar haqiqatan ham ulkan loyiha." }
+                ]
+            },
+            {
+                id: 2,
+                featured: false,
+                title: "Sun'iy intellekt tibbiyotda: o'zbekistonlik dasturchilar ko'z kasalliklarini erta aniqlovchi neyrotarmoq yaratdi",
+                category: "Texnologiya",
+                time: "Bugun, 08:15",
+                readTime: "4 daqiqa",
+                views: 14290,
+                author: "Malika Tursunova",
+                image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&q=80",
+                lead: "IT Park rezidentlari tomonidan ishlab chiqilgan «OcuScan AI» tizimi diabetik retinopatiyani 96,8 foiz aniqlik bilan bir necha soniya ichida tashxislaydi.",
+                content: [
+                    "Zamonaviy sun'iy intellekt algoritmlari endilikda nafaqat matn va tasvir yaratishda, balki inson salomatligini saqlashda ham hal qiluvchi ahamiyat kasb etmoqda. Toshkentlik yosh muhandislar va oftalmolog shifokorlar hamkorligida yaratilgan yangi platforma shuning yorqin misolidir.",
+                    "Tizim ko'z tubining raqamli suratini tahlil qilib, ko'rish qobiliyatini yo'qotishga olib keluvchi kasalliklarning ilk belgilarini aniqlaydi. Eng muhimi, ushbu dastur chekka hududlardagi oilaviy poliklinikalarda ham oddiy kompyuter orqali ishlashga moslashtirilgan.",
+                    "Hozirda loyiha Respublika ixtisoslashtirilgan ko'z mikroxirurgiyasi ilmiy-amaliy tibbiyot markazida klinik sinovlardan muvaffaqiyatli o'tmoqda."
+                ],
+                quote: "Texnologiya shifokorning o'rnini bosmaydi, balki unga minglab bemorlarni o'z vaqtida ko'rikdan o'tkazish uchun kuchli qurol beradi.",
+                quoteAuthor: "Loyiha rahbari Azizbek Qodirov",
+                tags: ["Sun'iy intellekt", "Tibbiyot", "IT Park", "Startap"],
+                comments: [
+                    { name: "Dr. Rustam", time: "1 soat oldin", text: "Viloyat shifoxonalariga tezroq joriy etilsa, ko'plab bemorlarning ko'rish qobiliyatini saqlab qolish mumkin." }
+                ]
+            },
+            {
+                id: 3,
+                featured: false,
+                title: "O'zbekiston milliy terma jamoasi Jahon chempionati saralashida muhim g'alabani qo'lga kiritdi",
+                category: "Sport",
+                time: "Bugun, 07:30",
+                readTime: "3 daqiqa",
+                views: 25610,
+                author: "Bobur Mirzayev",
+                image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=900&q=80",
+                lead: "Toshkentdagi «Bunyodkor» stadionida 34 ming tomoshabin qarshisida kechgan bahsda futbolchilarimiz ishonchli o'yin namoyish etib, guruh peshqadamligini mustahkamladi.",
+                content: [
+                    "Uchrashuvning ilk daqiqalaridanoq tashabbusni o'z qo'liga olgan terma jamoamiz raqib darvozasi oldida bir qator xavfli vaziyatlarni yuzaga keltirdi. Birinchi bo'limning 28-daqiqasida tezkor qarshi hujum chiroyli gol bilan yakunlandi.",
+                    "Ikkinchi taymda raqib jamoa bosimni kuchaytirgan bo'lsa-da, himoyachilarimiz va darvozabonning ishonchli harakatlari hisobni saqlab qolishga yordam berdi. 81-daqiqada zaxiradan maydonga tushgan yosh hujumchimiz ikkinchi golni urib, o'yin taqdirini hal qildi.",
+                    "Ushbu g'alabadan so'ng O'zbekiston terma jamoasi mundial yo'llanmasi sari yana bir ulkan qadam tashladi. Navbatdagi hal qiluvchi uchrashuv kelasi hafta safarda bo'lib o'tadi."
+                ],
+                quote: "Stadiondagi muhit aql bovar qilmas darajada edi. Muxlislarimizning qo'llab-quvvatlashi bizga qo'shimcha kuch bag'ishladi.",
+                quoteAuthor: "Terma jamoa sardori",
+                tags: ["Futbol", "Milliy terma jamoa", "JCH-2026", "Sport"],
+                comments: [
+                    { name: "Ulug'bek", time: "2 soat oldin", text: "Olg'a O'zbekiston! Mundialga chiqishimizga ishonamiz!" }
+                ]
+            },
+            {
+                id: 4,
+                featured: false,
+                title: "Markaziy bank asosiy stavkani o'zgarishsiz qoldirdi: inflyatsiya prognozlari va bank tizimidagi yangiliklar",
+                category: "Iqtisodiyot",
+                time: "Kecha, 19:40",
+                readTime: "4 daqiqa",
+                views: 11840,
+                author: "Otabek Yusupov",
+                image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=900&q=80",
+                lead: "Markaziy bank boshqaruvining navbatdagi yig'ilishida pul-kredit sharoitlarini qat'iy darajada saqlab qolish bo'yicha qaror qabul qilindi.",
+                content: [
+                    "Regulyator bayonotida qayd etilishicha, mamlakatda yalpi talabning yuqori sur'atlarda saqlanib qolishi va tashqi iqtisodiy noaniqliklar sharoitida narxlar barqarorligini ta'minlash ustuvor vazifa bo'lib qolmoqda.",
+                    "Shu bilan birga, tijorat banklarida milliy valyutadagi muddatli omonatlar hajmi o'tgan yilning mos davriga nisbatan 32 foizga oshgani kuzatilmoqda. Bu aholining milliy valyutaga bo'lgan ishonchi ortayotganidan dalolat beradi.",
+                    "Iqtisodchilar fikricha, yil oxirigacha inflyatsiya ko'rsatkichi belgilangan maqsadli koridor doirasida shakllanishi kutilmoqda."
+                ],
+                quote: "Narxlar barqarorligi — aholi real daromadlarini himoya qilish va uzoq muddatli investitsiyalarni rag'batlantirishning asosiy omilidir.",
+                quoteAuthor: "Markaziy bank sharhi",
+                tags: ["Iqtisodiyot", "Markaziy bank", "Inflyatsiya", "Moliya"],
+                comments: []
+            },
+            {
+                id: 5,
+                featured: false,
+                title: "Jahon savdosida yangi logistika yo'laklari: Transkaspiy marshruti orqali yuk tashish hajmi ikki barobarga oshdi",
+                category: "Jahon",
+                time: "Kecha, 18:10",
+                readTime: "5 daqiqa",
+                views: 9750,
+                author: "Nargiza Saidova",
+                image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80",
+                lead: "Osiyo va Yevropani bog'lovchi O'rta yo'lak (Transkaspiy xalqaro transport marshruti) global ta'minot zanjirida muhim strategik bo'g'inga aylanmoqda.",
+                content: [
+                    "So'nggi ikki yil ichida global dengiz yo'llaridagi murakkabliklar tufayli ko'plab xalqaro logistika kompaniyalari quruqlikdagi muqobil yo'nalishlarga e'tibor qarata boshladi. Xitoy — Markaziy Osiyo — Kaspiy dengizi — Kavkaz — Yevropa yo'nalishi eng tezkor yechimlardan biri sifatida e'tirof etilmoqda.",
+                    "Bojxona tartib-taomillarining raqamlashtirilishi va «yagona darcha» tizimining joriy etilishi natijasida konteyner poyezdlarining Xitoy chegarasidan Yevropa portlarigacha yetib borish muddati 14-16 kungacha qisqardi.",
+                    "O'zbekiston ushbu jarayonda mintaqaviy tranzit xab sifatida o'z temir yo'l va logistika markazlari salohiyatini faol kengaytirmoqda."
+                ],
+                quote: "Mintaqaviy transport integratsiyasi nafaqat tranzit daromadlarini oshiradi, balki mahalliy eksportchilar uchun yangi bozorlarni ochadi.",
+                quoteAuthor: "Xalqaro transport assotsiatsiyasi",
+                tags: ["Logistika", "Jahon iqtisodiyoti", "Eksport", "Transport"],
+                comments: []
+            },
+            {
+                id: 6,
+                featured: false,
+                title: "Samarqandda Xalqaro maqom va milliy musiqa festivali doirasida 40 dan ortiq davlat san'atkorlari jamlandi",
+                category: "Madaniyat",
+                time: "Kecha, 16:45",
+                readTime: "4 daqiqa",
+                views: 13200,
+                author: "Shahnoza Aliyeva",
+                image: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&w=900&q=80",
+                lead: "Registon maydonida o'tkazilayotgan nufuzli madaniy anjuman doirasida ilmiy konferensiyalar, mahorat darslari va jonli konsert dasturlari tashkil etildi.",
+                content: [
+                    "Qadimiy va hamisha navqiron Samarqand yana bir bor jahon madaniyati va san'ati markaziga aylandi. Festival ochilish marosimida UNESCO vakillari, taniqli musiqashunos olimlar va ko'plab xorijiy mehmonlar ishtirok etdi.",
+                    "Tadbir davomida Shashmaqomning noyob namunalari bilan bir qatorda, Sharq xalqlarining mumtoz kuy-qo'shiqlari zamonaviy sahna bezaklari uyg'unligida ijro etilmoqda.",
+                    "Madaniyat vazirligi ma'lumotiga ko'ra, festival kunlari Samarqandga tashrif buyurgan xorijiy sayyohlar oqimi o'tgan oyga nisbatan 45 foizga ko'paygan."
+                ],
+                quote: "Musiqa — tarjimon talab qilmaydigan yagona umuminsoniy til bo'lib, xalqlarni bir-biriga yanada yaqinlashtiradi.",
+                quoteAuthor: "Festival tashkiliy qo'mitasi",
+                tags: ["Madaniyat", "Samarqand", "Turizm", "San'at"],
+                comments: []
+            },
+            {
+                id: 7,
+                featured: false,
+                title: "Kvant kompyuterlari davri yaqinlashmoqda: yangi avlod protsessorlari murakkab hisob-kitoblarni soniyalarda bajarmoqda",
+                category: "Texnologiya",
+                time: "Kecha, 15:20",
+                readTime: "6 daqiqa",
+                views: 16450,
+                author: "Timur Xolmatov",
+                image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=900&q=80",
+                lead: "Yirik texnologik korporatsiyalar kubitlar barqarorligini oshirish bo'yicha navbatdagi ilmiy yutuqni e'lon qildi.",
+                content: [
+                    "An'anaviy superkompyuterlar ming yillar davomida yechishi mumkin bo'lgan molekulyar modellashtirish va kriptografik masalalarni kvant protsessorlari bir necha daqiqada hal qilish salohiyatiga ega.",
+                    "So'nggi tadqiqotlarda olimlar kvant xatolarini tuzatish algoritmlarini takomillashtirishga erishdi. Bu esa farmatsevtika sohasida yangi dori vositalarini kashf etish va yangi turdagi akkumulyator materiallarini yaratishni keskin tezlashtiradi.",
+                    "Mutaxassislarning prognoziga ko'ra, yaqin 5 yil ichida bulutli kvant hisoblash xizmatlari yirik ilmiy markazlar va banklar uchun odatiy vositaga aylanadi."
+                ],
+                quote: "Kvant texnologiyalari XXI asrning eng katta ilmiy inqilobi bo'lib, insoniyatning tabiat qonunlarini anglash imkoniyatlarini kengaytiradi.",
+                quoteAuthor: "Kvant fizikasi instituti",
+                tags: ["Kvant", "Texnologiya", "Ilm-fan", "Innovatsiya"],
+                comments: []
+            },
+            {
+                id: 8,
+                featured: false,
+                title: "Toshkentda jamoat transporti tizimi kengaytirilmoqda: yangi elektrobuslar va tezkor avtobus yo'laklari ishga tushadi",
+                category: "O'zbekiston",
+                time: "Kecha, 13:50",
+                readTime: "4 daqiqa",
+                views: 15890,
+                author: "Jamshid Karimov",
+                image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=900&q=80",
+                lead: "Poytaxt ko'chalarida tirbandliklarni kamaytirish va ekologik vaziyatni yaxshilash maqsadida yana 200 ta zamonaviy elektrobus xarid qilinmoqda.",
+                content: [
+                    "Toshkent shahar transport boshqarmasi ma'lum qilishicha, yangi avtobuslar harakatlanish intervalini 7-10 daqiqagacha qisqartirish imkonini beradi. Barcha transport vositalari konditsioner, Wi-Fi va imkoniyati cheklangan shaxslar uchun maxsus panduslar bilan jihozlangan.",
+                    "Shuningdek, markaziy shoh ko'chalarda jamoat transporti uchun ajratilgan maxsus (BRT) yo'laklar tarmog'i kengaytiriladi. Bu yo'lovchilarning manzilga yetib borish vaqtini o'rtacha 25 foizga tejaydi.",
+                    "Elektron to'lov tizimidan foydalanuvchilar uchun esa moslashuvchan tarif rejalari va bir soat ichida bepul almashib chiqish imtiyozlari amal qilmoqda."
+                ],
+                quote: "Zamonaviy shahar infratuzilmasi shaxsiy avtomobillar uchun emas, balki eng avvalo piyodalar va jamoat transporti qulayligi uchun qurilishi kerak.",
+                quoteAuthor: "Urbanistika markazi eksperti",
+                tags: ["Toshkent", "Transport", "Ekologiya", "Shaharsozlik"],
+                comments: []
+            },
+            {
+                id: 9,
+                featured: false,
+                title: "Yevropa markaziy banki foiz stavkalarini pasaytirish siklini davom ettirdi: jahon birjalari qanday reaksiya bildirdi?",
+                category: "Jahon",
+                time: "Kecha, 11:30",
+                readTime: "4 daqiqa",
+                views: 8420,
+                author: "Otabek Yusupov",
+                image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=900&q=80",
+                lead: "Yevrohududda inflyatsiya bosimining pasayishi fonida regulyator iqtisodiy o'sishni rag'batlantirish choralarini ko'rmoqda.",
+                content: [
+                    "Frankfurtda bo'lib o'tgan yig'ilish yakunlariga ko'ra, asosiy kredit stavkasi 25 bazis punktga tushirildi. Bu qaror Yevropa sanoat korxonalari va ipoteka bozori uchun ijobiy signal sifatida baholandi.",
+                    "Qaror e'lon qilinganidan so'ng Yevropaning yetakchi fond indekslari — DAX va CAC 40 o'sish bilan yopildi. Oltin narxi esa global investorlarning talabi tufayli tarixiy maksimumlar atrofida saqlanib turibdi.",
+                    "Tahlilchilar fikricha, rivojlanayotgan mamlakatlar bozorlariga kapital oqimi kelgusi chorakda yanada faollashishi mumkin."
+                ],
+                quote: "Pul-kredit siyosatining yumshatilishi kichik va o'rta biznes uchun arzon kredit resurslaridan foydalanish imkonini ochadi.",
+                quoteAuthor: "Bloomberg moliyaviy sharhi",
+                tags: ["Jahon", "Moliya", "Birja", "Yevropa"],
+                comments: []
+            },
+            {
+                id: 10,
+                featured: false,
+                title: "O'zbekiston shaxmatchilari Butunjahon shaxmat olimpiadasida yana bir bor shohsupaga ko'tarildi",
+                category: "Sport",
+                time: "10-Noyabr, 21:15",
+                readTime: "3 daqiqa",
+                views: 19300,
+                author: "Bobur Mirzayev",
+                image: "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=900&q=80",
+                lead: "Yosh grossmeysterlarimiz hal qiluvchi turda kuchli raqib ustidan g'alaba qozonib, o'zbek shaxmat maktabi dunyoda yetakchilardan biri ekanini isbotladi.",
+                content: [
+                    "Musobaqa davomida birorta ham mag'lubiyatga uchramagan jamoamiz a'zolari yuqori intellektual tayyorgarlik va mustahkam iroda namoyish etdi. Ayniqsa, birinchi va ikkinchi taxtalarda o'ynagan yetakchilarimizning chiroyli kombinatsiyalari mutaxassislar olqishiga sazovor bo'ldi.",
+                    "Xalqaro shaxmat federatsiyasi (FIDE) prezidenti o'zbekistonlik yoshlarning tezkor o'sishini alohida e'tirof etib, mamlakatda shaxmatni ommalashtirish dasturlarini yuqori baholadi.",
+                    "Endilikda sportchilarimiz kelasi oy bo'lib o'tadigan Rapid va Blits bo'yicha jahon chempionatiga tayyorgarlikni boshlaydi."
+                ],
+                quote: "Har bir partiyada biz nafaqat o'zimiz uchun, balki butun O'zbekiston xalqi quvonchi uchun dona surdik.",
+                quoteAuthor: "Grossmeyster Nodirbek Abdusattorov",
+                tags: ["Shaxmat", "Sport", "G'alaba", "Yoshlar"],
+                comments: []
+            },
+            {
+                id: 11,
+                featured: false,
+                title: "IT-eksport hajmi 1 milliard dollarlik marraga yaqinlashmoqda: hududlarda masofaviy xizmatlar markazlari ko'paymoqda",
+                category: "Iqtisodiyot",
+                time: "10-Noyabr, 17:05",
+                readTime: "5 daqiqa",
+                views: 12110,
+                author: "Malika Tursunova",
+                image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80",
+                lead: "O'zbekistonlik dasturchilar va BPO kompaniyalari AQSh, Yevropa hamda Yaqin Sharq bozorlariga dasturiy mahsulotlar yetkazib bermoqda.",
+                content: [
+                    "Raqamli texnologiyalar vazirligi ma'lumotlariga ko'ra, eksportchi IT-kompaniyalar soni 800 tadan oshdi. Soliq imtiyozlari va «Zero Risk» dasturi xorijiy texnologik kompaniyalarning O'zbekistonda o'z ofislarini ochishiga turtki bermoqda.",
+                    "Quvonarlisi, IT-xizmatlar eksportining qariyb 35 foizi endilikda Toshkent shahridan tashqarida — Samarqand, Farg'ona, Andijon va Xorazm viloyatlari hissasiga to'g'ri kelmoqda.",
+                    "Xorijiy tillarni biladigan yoshlar uchun BPO markazlarida yuqori maoshli ish o'rinlari yaratilishi davom etmoqda."
+                ],
+                quote: "Raqamli eksport — bu tabiiy resurslarni sarflamasdan turib mamlakatga yuqori qo'shilgan qiymat va valyuta olib kirishning eng samarali yo'lidir.",
+                quoteAuthor: "IT Park tahlilchisi",
+                tags: ["IT-eksport", "Iqtisodiyot", "BPO", "Dasturlash"],
+                comments: []
+            },
+            {
+                id: 12,
+                featured: false,
+                title: "O'zbek kinoijodkorlarining tarixiy filmi xalqaro kinofestivalda «Eng yaxshi rejissura» mukofotiga sazovor bo'ldi",
+                category: "Madaniyat",
+                time: "10-Noyabr, 14:20",
+                readTime: "4 daqiqa",
+                views: 10540,
+                author: "Shahnoza Aliyeva",
+                image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=80",
+                lead: "Buyuk ipak yo'li tarixi va allomalar merosiga bag'ishlangan badiiy film hakamlar hay'ati va tomoshabinlarning yuksak e'tirofiga sazovor bo'ldi.",
+                content: [
+                    "Filmni suratga olish ishlari Xiva, Buxoro va Toshkent viloyatining tog'li hududlarida olib borilgan bo'lib, unda o'sha davr muhitini yaratish uchun maxsus dekoratsiyalar va tarixiy liboslar tikilgan.",
+                    "Kino tanqidchilarining ta'kidlashicha, operatorlik mahorati, milliy musiqa uyg'unligi va aktyorlarning samimiy ijrosi kartinani jahon darajasidagi asarga aylantirgan.",
+                    "Tez kunlarda film mamlakatimizning barcha kinoteatrlarida keng tomoshabinlar ommasiga namoyish etiladi."
+                ],
+                quote: "Boy tariximiz va madaniyatimizni kino tili orqali dunyoga tanitish — ijodkorlarimiz oldidagi eng sharafli vazifadir.",
+                quoteAuthor: "Kinematografiya agentligi",
+                tags: ["Kino", "Madaniyat", "Tarix", "Festival"],
+                comments: []
+            }
+        ];
+
+        // ==========================================
+        // 2. STATE MANAGEMENT
+        // ==========================================
+        let state = {
+            selectedCategory: "Barchasi",
+            searchQuery: "",
+            currentArticleId: null,
+            fontSizeStep: 0, // -1, 0, +1, +2
+            pollVoted: false,
+            pollData: [
+                { id: 0, label: "Ha, har kuni faol foydalanaman", votes: 685 },
+                { id: 1, label: "Ba'zan ma'lumot izlashda yordam beradi", votes: 514 },
+                { id: 2, label: "Hali unchalik ko'p ishlatmayman", votes: 229 }
+            ]
+        };
+
+        // ==========================================
+        // 3. DOM ELEMENTS & INITIALIZATION
+        // ==========================================
+        document.addEventListener("DOMContentLoaded", () => {
+            initTheme();
+            renderNavigation();
+            renderBreakingTicker();
+            renderHeroSection();
+            renderArticlesGrid();
+            renderTopReadWidget();
+            renderPollWidget();
+            setupEventListeners();
+        });
+
+        // Theme (Dark / Light)
+        function initTheme() {
+            const savedTheme = localStorage.getItem("zamon24-theme");
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add("dark");
+                updateThemeIcon(true);
+            } else {
+                updateThemeIcon(false);
+            }
+        }
+
+        function updateThemeIcon(isDark) {
+            const icon = document.getElementById("theme-icon");
+            if (isDark) {
+                icon.className = "fa-solid fa-sun text-base";
+            } else {
+                icon.className = "fa-solid fa-moon text-base";
+            }
+        }
+
+        // ==========================================
+        // 4. RENDER FUNCTIONS
+        // ==========================================
+        function renderNavigation() {
+            const desktopNav = document.getElementById("desktop-nav");
+            const mobileNav = document.getElementById("mobile-nav");
+
+            const createBtn = (cat, isMobile) => {
+                const isActive = state.selectedCategory === cat;
+                const baseClass = isMobile
+                    ? "px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all"
+                    : "px-3.5 py-2 rounded-xl text-sm font-semibold transition-all";
+                const activeClass = isActive
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800";
+
+                return `<button onclick="selectCategory('${cat.replace(/'/g, "\\'")}')" class="${baseClass} ${activeClass}">${cat}</button>`;
+            };
+
+            desktopNav.innerHTML = CATEGORIES.map(c => createBtn(c, false)).join("");
+            mobileNav.innerHTML = CATEGORIES.map(c => createBtn(c, true)).join("");
+        }
+
+        function renderBreakingTicker() {
+            const ticker = document.getElementById("breaking-ticker");
+            const items = ARTICLES.slice(0, 6).map(art => `
+                <button onclick="openArticle(${art.id})" class="inline-flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition text-left">
+                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">${art.time.split(', ')[1] || art.time}</span>
+                    <span>${art.title}</span>
+                    <span class="text-slate-300 dark:text-slate-700 ml-4">•</span>
+                </button>
+            `).join("");
+            // Duplicate for seamless infinite scroll
+            ticker.innerHTML = items + items;
+        }
+
+        function renderHeroSection() {
+            const heroSection = document.getElementById("hero-section");
+            const isFiltered = state.selectedCategory !== "Barchasi" || state.searchQuery.trim() !== "";
+
+            if (isFiltered) {
+                heroSection.classList.add("hidden");
+                return;
+            }
+            heroSection.classList.remove("hidden");
+
+            // Featured Article
+            const featured = ARTICLES.find(a => a.featured) || ARTICLES[0];
+            document.getElementById("featured-container").innerHTML = `
+                <article onclick="openArticle(${featured.id})" class="group relative h-full min-h-[380px] sm:min-h-[460px] rounded-2xl overflow-hidden cursor-pointer shadow-md border border-slate-200/80 dark:border-slate-800 bg-slate-900">
+                    <img src="${featured.image}" alt="${featured.title}" onerror="this.src='https://placehold.co/1200x700/1e293b/ffffff?text=ZAMON24.UZ'" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-85">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
+                    
+                    <div class="relative h-full flex flex-col justify-end p-6 sm:p-8 text-white">
+                        <div class="flex flex-wrap items-center gap-2.5 mb-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-600 text-white">
+                                Kun mavzusi
+                            </span>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-md">
+                                ${featured.category}
+                            </span>
+                            <span class="text-xs text-slate-300"><i class="fa-regular fa-clock mr-1"></i>${featured.time}</span>
+                        </div>
+                        
+                        <h1 class="text-2xl sm:text-3xl font-extrabold leading-snug mb-3 group-hover:text-blue-300 transition-colors">
+                            ${featured.title}
+                        </h1>
+                        
+                        <p class="text-sm sm:text-base text-slate-200 line-clamp-2 mb-4 max-w-3xl">
+                            ${featured.lead}
+                        </p>
+
+                        <div class="flex items-center justify-between pt-3 border-t border-white/15 text-xs text-slate-300">
+                            <span><i class="fa-regular fa-user mr-1.5"></i>${featured.author}</span>
+                            <span class="font-semibold text-blue-300 group-hover:translate-x-1 transition-transform">
+                                Batafsil o'qish <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </span>
+                        </div>
+                    </div>
+                </article>
+            `;
+
+            // Latest News List (Right column)
+            const latestList = document.getElementById("latest-news-list");
+            latestList.innerHTML = ARTICLES.slice(1, 8).map(art => `
+                <div onclick="openArticle(${art.id})" class="group cursor-pointer pb-3.5 border-b border-slate-100 dark:border-slate-800 last:border-none last:pb-0">
+                    <div class="flex items-center gap-2 text-[11px] text-slate-400 mb-1">
+                        <span class="font-bold text-blue-600 dark:text-blue-400">${art.time}</span>
+                        <span>•</span>
+                        <span>${art.category}</span>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug line-clamp-2">
+                        ${art.title}
+                    </h3>
+                </div>
+            `).join("");
+        }
+
+        function getFilteredArticles() {
+            return ARTICLES.filter(art => {
+                const matchCategory = state.selectedCategory === "Barchasi" || art.category === state.selectedCategory;
+                const query = state.searchQuery.trim().toLowerCase();
+                const matchSearch = !query || 
+                    art.title.toLowerCase().includes(query) || 
+                    art.lead.toLowerCase().includes(query) ||
+                    art.category.toLowerCase().includes(query);
+                return matchCategory && matchSearch;
+            });
+        }
+
+        function renderArticlesGrid() {
+            const grid = document.getElementById("articles-grid");
+            const emptyState = document.getElementById("empty-state");
+            const countBadge = document.getElementById("articles-count");
+            const filterBanner = document.getElementById("filter-banner");
+            const filterStatusText = document.getElementById("filter-status-text");
+
+            const filtered = getFilteredArticles();
+            countBadge.textContent = `${filtered.length} ta maqola`;
+
+            // Update filter banner
+            const isFiltered = state.selectedCategory !== "Barchasi" || state.searchQuery.trim() !== "";
+            if (isFiltered) {
+                filterBanner.classList.remove("hidden");
+                let msg = `Natijalar: `;
+                if (state.selectedCategory !== "Barchasi") msg += `Rukn — <strong>${state.selectedCategory}</strong>. `;
+                if (state.searchQuery.trim() !== "") msg += `Qidiruv — <strong>"${state.searchQuery}"</strong>.`;
+                filterStatusText.innerHTML = msg;
+            } else {
+                filterBanner.classList.add("hidden");
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = "";
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            emptyState.classList.add("hidden");
+
+            grid.innerHTML = filtered.map(art => `
+                <article onclick="openArticle(${art.id})" class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col">
+                    <div class="relative aspect-[16/10] overflow-hidden bg-slate-200 dark:bg-slate-800">
+                        <img src="${art.image}" alt="${art.title}" loading="lazy" onerror="this.src='https://placehold.co/800x500/1e293b/ffffff?text=ZAMON24.UZ'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold bg-slate-900/80 text-white backdrop-blur-md">
+                            ${art.category}
+                        </span>
+                    </div>
+                    
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex items-center justify-between text-xs text-slate-400 mb-2.5">
+                            <span><i class="fa-regular fa-clock mr-1"></i>${art.time}</span>
+                            <span><i class="fa-regular fa-eye mr-1"></i>${art.views.toLocaleString()}</span>
+                        </div>
+                        
+                        <h3 class="text-lg font-extrabold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug mb-2.5 line-clamp-2">
+                            ${art.title}
+                        </h3>
+                        
+                        <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4 flex-1 leading-relaxed">
+                            ${art.lead}
+                        </p>
+                        
+                        <div class="pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                            <span class="font-medium text-slate-500 dark:text-slate-400">${art.author}</span>
+                            <span class="font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                ${art.readTime} <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+                </article>
+            `).join("");
+        }
+
+        function renderTopReadWidget() {
+            const container = document.getElementById("top-read-list");
+            const top5 = [...ARTICLES].sort((a, b) => b.views - a.views).slice(0, 5);
+
+            container.innerHTML = top5.map((art, index) => `
+                <div onclick="openArticle(${art.id})" class="group flex items-start gap-3.5 cursor-pointer">
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-600 group-hover:text-white text-slate-600 dark:text-slate-300 font-extrabold text-xs flex items-center justify-center shrink-0 transition-colors">
+                        ${index + 1}
+                    </span>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug line-clamp-2">
+                            ${art.title}
+                        </h4>
+                        <span class="text-[11px] text-slate-400 mt-1 block">
+                            <i class="fa-regular fa-eye mr-1"></i>${art.views.toLocaleString()} ko'rish
+                        </span>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderPollWidget() {
+            const container = document.getElementById("poll-options");
+            const totalVotes = state.pollData.reduce((sum, item) => sum + item.votes, 0);
+            document.getElementById("poll-total").textContent = `Jami ovozlar: ${totalVotes.toLocaleString()} ta`;
+
+            container.innerHTML = state.pollData.map(opt => {
+                const percent = Math.round((opt.votes / totalVotes) * 100);
+                if (!state.pollVoted) {
+                    return `
+                        <button onclick="votePoll(${opt.id})" class="w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-slate-800 text-xs font-semibold transition flex items-center justify-between">
+                            <span>${opt.label}</span>
+                            <i class="fa-regular fa-circle text-slate-400"></i>
+                        </button>
+                    `;
+                } else {
+                    return `
+                        <div class="relative p-3 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden text-xs">
+                            <div class="absolute inset-y-0 left-0 bg-blue-600/15 dark:bg-blue-500/20 transition-all duration-700" style="width: ${percent}%"></div>
+                            <div class="relative flex items-center justify-between font-semibold">
+                                <span>${opt.label}</span>
+                                <span class="text-blue-600 dark:text-blue-400 font-bold">${percent}%</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join("");
+        }
+
+        // ==========================================
+        // 5. INTERACTIVE ACTIONS & MODAL
+        // ==========================================
+        function selectCategory(cat) {
+            state.selectedCategory = cat;
+            renderNavigation();
+            renderHeroSection();
+            renderArticlesGrid();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function clearSearch() {
+            state.searchQuery = "";
+            document.getElementById("search-input").value = "";
+            document.getElementById("clear-search").classList.add("hidden");
+            renderHeroSection();
+            renderArticlesGrid();
+        }
+
+        function resetFilters() {
+            state.selectedCategory = "Barchasi";
+            clearSearch();
+            renderNavigation();
+        }
+
+        function votePoll(id) {
+            if (state.pollVoted) return;
+            const option = state.pollData.find(o => o.id === id);
+            if (option) {
+                option.votes += 1;
+                state.pollVoted = true;
+                renderPollWidget();
+                showToast("Ovozingiz qabul qilindi! Rahmat.");
+            }
+        }
+
+        // Open Article Reader Modal
+        function openArticle(id) {
+            const art = ARTICLES.find(a => a.id === id);
+            if (!art) return;
+
+            state.currentArticleId = id;
+            art.views += 1; // Increment view count
+            renderTopReadWidget();
+
+            document.getElementById("modal-category-badge").textContent = art.category;
+            document.getElementById("modal-date").textContent = art.time;
+            document.getElementById("modal-title").textContent = art.title;
+            document.getElementById("modal-author").textContent = art.author;
+            document.getElementById("modal-author-avatar").textContent = art.author.charAt(0);
+            document.getElementById("modal-read-time").textContent = art.readTime;
+            document.getElementById("modal-views").textContent = art.views.toLocaleString();
+            
+            const img = document.getElementById("modal-image");
+            img.src = art.image;
+            img.onerror = () => { img.src = 'https://placehold.co/1200x700/1e293b/ffffff?text=ZAMON24.UZ'; };
+
+            document.getElementById("modal-lead").textContent = art.lead;
+            document.getElementById("modal-body").innerHTML = art.content.map(p => `<p>${p}</p>`).join("");
+            
+            document.getElementById("modal-quote").textContent = `“${art.quote}”`;
+            document.getElementById("modal-quote-author").textContent = `— ${art.quoteAuthor}`;
+
+            // Tags
+            document.getElementById("modal-tags").innerHTML = art.tags.map(tag => `
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    #${tag}
+                </span>
+            `).join("");
+
+            // Related Articles
+            const related = ARTICLES.filter(a => a.category === art.category && a.id !== art.id).slice(0, 2);
+            const fallbackRelated = related.length < 2 ? ARTICLES.filter(a => a.id !== art.id).slice(0, 2) : related;
+            document.getElementById("modal-related").innerHTML = fallbackRelated.map(rel => `
+                <div onclick="openArticle(${rel.id})" class="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 cursor-pointer transition flex gap-3 items-center">
+                    <img src="${rel.image}" alt="" class="w-16 h-16 rounded-xl object-cover shrink-0">
+                    <div>
+                        <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">${rel.category}</span>
+                        <h4 class="text-xs font-bold line-clamp-2 text-slate-800 dark:text-slate-200 mt-0.5">${rel.title}</h4>
+                    </div>
+                </div>
+            `).join("");
+
+            renderModalComments(art);
+
+            const modal = document.getElementById("article-modal");
+            modal.classList.remove("hidden");
+            modal.scrollTop = 0;
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeArticleModal() {
+            document.getElementById("article-modal").classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+        function renderModalComments(art) {
+            document.getElementById("comment-count").textContent = art.comments.length;
+            const list = document.getElementById("comments-list");
+            if (art.comments.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 italic">Hozircha izohlar yo'q. Birinchi bo'lib fikr bildiring!</p>`;
+                return;
+            }
+            list.innerHTML = art.comments.map(c => `
+                <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${c.name}</span>
+                        <span class="text-[11px] text-slate-400">${c.time}</span>
+                    </div>
+                    <p class="text-sm text-slate-600 dark:text-slate-300">${c.text}</p>
+                </div>
+            `).join("");
+        }
+
+        function changeFontSize(delta) {
+            state.fontSizeStep = Math.max(-1, Math.min(2, state.fontSizeStep + delta));
+            const body = document.getElementById("modal-body");
+            const sizes = ["text-sm sm:text-base", "text-base sm:text-lg", "text-lg sm:text-xl", "text-xl sm:text-2xl"];
+            body.className = `font-serif ${sizes[state.fontSizeStep + 1]} text-slate-700 dark:text-slate-300 leading-relaxed space-y-5`;
+        }
+
+        function copyArticleLink() {
+            const dummyInput = document.createElement("input");
+            dummyInput.value = window.location.href;
+            document.body.appendChild(dummyInput);
+            dummyInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummyInput);
+            showToast("Maqola havolasi buferga nusxalandi!");
+        }
+
+        // Custom Toast Notification
+        function showToast(message) {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = "pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900 dark:bg-blue-600 text-white text-xs sm:text-sm font-semibold shadow-xl fade-in";
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 dark:text-white"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transition = "opacity 0.3s ease";
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ==========================================
+        // 6. EVENT LISTENERS
+        // ==========================================
+        function setupEventListeners() {
+            // Theme Toggle
+            document.getElementById("theme-toggle").addEventListener("click", () => {
+                const isDark = document.documentElement.classList.toggle("dark");
+                localStorage.setItem("zamon24-theme", isDark ? "dark" : "light");
+                updateThemeIcon(isDark);
+            });
+
+            // Live Search
+            const searchInput = document.getElementById("search-input");
+            const clearBtn = document.getElementById("clear-search");
+            searchInput.addEventListener("input", (e) => {
+                state.searchQuery = e.target.value;
+                if (state.searchQuery.trim() !== "") {
+                    clearBtn.classList.remove("hidden");
+                } else {
+                    clearBtn.classList.add("hidden");
+                }
+                renderHeroSection();
+                renderArticlesGrid();
+            });
+
+            // Currency Converter
+            const RATE = 12840.50;
+            const usdInput = document.getElementById("usd-input");
+            const uzsInput = document.getElementById("uzs-input");
+
+            usdInput.addEventListener("input", () => {
+                const usd = parseFloat(usdInput.value) || 0;
+                uzsInput.value = Math.round(usd * RATE);
+            });
+
+            uzsInput.addEventListener("input", () => {
+                const uzs = parseFloat(uzsInput.value) || 0;
+                usdInput.value = (uzs / RATE).toFixed(2);
+            });
+
+            // Newsletter Subscription
+            document.getElementById("newsletter-form").addEventListener("submit", (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById("newsletter-email");
+                if (emailInput.value.trim()) {
+                    showToast(`${emailInput.value} manzili kunlik dayjestga muvaffaqiyatli ulandi!`);
+                    emailInput.value = "";
+                }
+            });
+
+            // Comment Submission
+            document.getElementById("comment-form").addEventListener("submit", (e) => {
+                e.preventDefault();
+                const name = document.getElementById("comment-name").value.trim();
+                const text = document.getElementById("comment-text").value.trim();
+                if (!name || !text || !state.currentArticleId) return;
+
+                const art = ARTICLES.find(a => a.id === state.currentArticleId);
+                if (art) {
+                    art.comments.unshift({
+                        name,
+                        time: "Hozirgina",
+                        text
+                    });
+                    renderModalComments(art);
+                    document.getElementById("comment-text").value = "";
+                    showToast("Izohingiz muvaffaqiyatli qo'shildi!");
+                }
+            });
+
+            // Close modal on outside click or Escape key
+            document.getElementById("article-modal").addEventListener("click", (e) => {
+                if (e.target.id === "article-modal") closeArticleModal();
+            });
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") closeArticleModal();
+            });
+        }
+    </script>
+</body>
+</html>
